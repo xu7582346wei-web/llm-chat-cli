@@ -804,6 +804,23 @@ class Agent:
         Returns:
             str: AI 回答。
         """
+        # ---- 安全：输入注入检测 ----
+        from security import check_injection, rate_limiter
+        import logging
+        sec_log = logging.getLogger("agent")
+
+        suspicious, pattern = check_injection(user_input)
+        if suspicious:
+            sec_log.warning(
+                f"检测到疑似提示注入：{pattern}",
+                extra={"event": "injection_blocked", "user": "default"},
+            )
+            return "抱歉，你的输入包含可疑指令，我无法处理。"
+
+        # ---- 安全：限流 ----
+        if not rate_limiter.allow("default"):
+            return "今日请求次数已达上限，请明天再试。"
+
         self.messages.append({"role": "user", "content": user_input})
 
         # 启发式判断：长输入或含特定关键词则用规划

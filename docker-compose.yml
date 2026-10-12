@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agent-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    # 有 NVIDIA GPU 时取消下面注释
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  agent:
+    build: .
+    container_name: agent-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=ollama
+      - OPENAI_BASE_URL=http://ollama:11434/v1
+      - AGENT_API_KEY=${AGENT_API_KEY:-}
+    depends_on:
+      - ollama
+    volumes:
+      - ./knowledge:/app/knowledge:ro
+      - ./sessions:/app/sessions
+      - ./agent_memory.json:/app/agent_memory.json
+    restart: unless-stopped
+
+volumes:
+  ollama-data:

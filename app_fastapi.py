@@ -5,7 +5,9 @@ import json
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
+import time
 from typing import Optional
+from fastapi import Depends, Header
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
@@ -51,6 +53,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="LLM Agent API", lifespan=lifespan)
 
+# 服务启动时间（用于健康检查）
+START_TIME = time.time()
+
+# API 认证（可选，通过 .env 配置 AGENT_API_KEY 启用）
+API_KEY = os.getenv("AGENT_API_KEY", "")
+
+
+async def verify_key(x_api_key: str = Header(None)):
+    """API Key 认证。未配置 AGENT_API_KEY 时跳过（本地开发用）。"""
+    if not API_KEY:
+        return
+    if x_api_key != API_KEY:
+        raise HTTPException(401, "Invalid API key")
+
+
 
 # ==================== 请求模型 ====================
 class ChatRequest(BaseModel):
@@ -79,7 +96,7 @@ async def get_state():
 
 
 # ==================== 对话（SSE） ====================
-@app.post("/api/chat")
+@app.post("/api/chat", dependencies=[Depends(verify_key)])
 async def chat(req: ChatRequest):
     if state["agent"] is None:
         raise HTTPException(500, "Agent 未初始化")
@@ -190,6 +207,22 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/")
 async def index():
     return FileResponse("static/index.html")
+
+
+
+
+@app.get("/health")
+async def health():
+    """健康检查接口。"""
+    store = state.get("store")
+    agent_inst = state.get("agent")
+    return {
+        "status": "ok",
+        "model": MODEL,
+        "knowledge_chunks": len(store.chunks) if store else 0,
+        "history_len": len(agent_inst.messages) if agent_inst else 0,
+        "uptime": round(time.time() - START_TIME, 1),
+    }
 
 
 if __name__ == "__main__":

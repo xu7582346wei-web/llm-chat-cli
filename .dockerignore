@@ -1,0 +1,10 @@
+.venv/
+.git/
+.env
+*.log
+__pycache__/
+*.pyc
+sessions/
+eval/report.json
+traces/
+graph.png
