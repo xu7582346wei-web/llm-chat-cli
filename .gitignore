@@ -3,6 +3,8 @@
 chat.log
 agent.log
 agent_memory.json
+streamlit.log
+uvicorn.log
 __pycache__/
 *.pyc
 *.pyo

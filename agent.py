@@ -90,7 +90,6 @@ def recall_facts() -> str:
 
 # ==================== 会话保存 ====================
 def save_session(messages, path=None):
-    """保存对话到 JSON 文件。返回文件路径。"""
     SESSION_DIR.mkdir(exist_ok=True)
     if path is None:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -99,7 +98,6 @@ def save_session(messages, path=None):
         path = Path(path)
         path.parent.mkdir(exist_ok=True)
 
-    # 只保存可序列化的字段
     clean = []
     for m in messages:
         if not isinstance(m, dict):
@@ -134,7 +132,6 @@ def save_session(messages, path=None):
 
 
 def load_session(path):
-    """从 JSON 文件加载对话。返回 messages 列表。"""
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"会话文件不存在：{path}")
@@ -143,7 +140,6 @@ def load_session(path):
 
 
 def list_sessions():
-    """列出所有会话文件。"""
     if not SESSION_DIR.exists():
         return []
     return sorted(SESSION_DIR.glob("*.json"), reverse=True)
@@ -396,7 +392,7 @@ def safe_run(name, args):
 
 
 # ==================== ReAct ====================
-def react_once(task, max_steps=None, verbose=True, messages=None):
+def react_once(task, max_steps=None, verbose=True, messages=None, on_event=None):
     max_steps = max_steps or MAX_REACT_STEPS
     if messages is None:
         messages = [
@@ -458,6 +454,13 @@ def react_once(task, max_steps=None, verbose=True, messages=None):
 
             log.info(f"tool_call name={name} args={args}")
 
+            if on_event:
+                on_event("tool_call", {
+                    "name": name,
+                    "args": args,
+                    "result": str(result)[:500],
+                })
+
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc.id,
@@ -499,30 +502,39 @@ def summarize(user_input, results):
     return resp.choices[0].message.content
 
 
-def plan_execute(user_input, verbose=True):
-    print(f"\n[规划中] ...")
+def plan_execute(user_input, verbose=True, on_event=None):
+    if verbose:
+        print(f"\n[规划中] ...")
     plan = make_plan(user_input)
     if not plan:
-        print("[降级] 直接 ReAct")
-        return react_once(user_input, verbose=verbose)
+        if verbose:
+            print("[降级] 直接 ReAct")
+        return react_once(user_input, verbose=verbose, on_event=on_event)
 
-    print(f"[计划] 共 {len(plan)} 步：")
-    for item in plan:
-        print(f"  {item.get('step', '?')}. {item.get('task', '')}")
+    if verbose:
+        print(f"[计划] 共 {len(plan)} 步：")
+        for item in plan:
+            print(f"  {item.get('step', '?')}. {item.get('task', '')}")
+
+    if on_event:
+        on_event("plan", {"plan": plan})
 
     results = []
     for item in plan:
         task = item.get("task", "")
-        print(f"\n[执行 Step {item.get('step', '?')}] {task}")
-        answer = react_once(task, verbose=verbose)
+        if verbose:
+            print(f"\n[执行 Step {item.get('step', '?')}] {task}")
+        answer = react_once(task, verbose=verbose, on_event=on_event)
         results.append({
             "step": item.get("step", "?"),
             "task": task,
             "result": answer,
         })
-        print(f"  → {answer}")
+        if verbose:
+            print(f"  → {answer}")
 
-    print(f"\n[汇总] ...")
+    if verbose:
+        print(f"\n[汇总] ...")
     return summarize(user_input, results)
 
 
@@ -539,7 +551,7 @@ class Agent:
                 long_term = "\n\n[长期记忆]\n" + "\n".join(f"- {f}" for f in mem["facts"])
         self.messages = [{"role": "system", "content": SYSTEM_PROMPT + long_term}]
 
-    def chat(self, user_input, verbose=True):
+    def chat(self, user_input, verbose=True, on_event=None):
         self.messages.append({"role": "user", "content": user_input})
 
         need_plan = (
@@ -550,9 +562,14 @@ class Agent:
         )
 
         if need_plan:
-            answer = plan_execute(user_input, verbose=verbose)
+            answer = plan_execute(user_input, verbose=verbose, on_event=on_event)
         else:
-            answer = react_once(user_input, verbose=verbose, messages=self.messages)
+            answer = react_once(
+                user_input,
+                verbose=verbose,
+                messages=self.messages,
+                on_event=on_event,
+            )
 
         self.messages.append({"role": "assistant", "content": answer})
         return answer
@@ -570,11 +587,9 @@ class Agent:
                 print(f"[{role}] {content}")
 
     def save(self, path=None):
-        """保存当前会话。"""
         return save_session(self.messages, path)
 
     def load(self, path):
-        """加载会话（替换当前 messages）。"""
         self.messages = load_session(path)
 
 
@@ -646,7 +661,6 @@ def main():
             name = q[6:].strip()
             path = SESSION_DIR / name
             if not path.exists():
-                # 尝试加 .json 后缀
                 path = SESSION_DIR / f"{name}.json"
             try:
                 agent.load(path)
