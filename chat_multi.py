@@ -36,7 +36,7 @@ client = OpenAI(
     timeout=60,
 )
 
-MODEL = "qwen2.5:7b"
+MODEL = "qwen3:8b"
 
 BASE_SYSTEM = """你是一个有用、简洁的助手。
 根据用户的问题调整回答方式：
