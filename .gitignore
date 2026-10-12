@@ -11,3 +11,6 @@ __pycache__/
 .idea/
 .vscode/
 sessions/
+eval/report.json
+graph.png
+traces/
