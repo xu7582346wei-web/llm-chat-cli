@@ -64,7 +64,8 @@ USE_MEMORY = True
 
 # ==================== System Prompts ====================
 # 主 Agent 的行为准则。核心是"先思考再行动"和"不编造"。
-SYSTEM_PROMPT = """你是一个会使用工具的 Agent。
+SYSTEM_PROMPT = """/no_think
+你是一个会使用工具的 Agent。**必须优先使用工具，不要凭训练记忆回答**。
 每次行动前，先用一句话说明你的思考。
 然后决定：
 - 需要工具 → 通过标准 function call 调用
@@ -75,6 +76,7 @@ SYSTEM_PROMPT = """你是一个会使用工具的 Agent。
 - 公司政策、流程、常见问题 → 用 search_knowledge 查
 - 实时信息（天气、时间）→ 用对应工具
 - 计算必须用 calculator
+- 用户问当前时间/日期 → 必须用 get_time，不要凭记忆回答
 - 调用工具必须用 function call 机制，不要在回答文本里写 {"name": ...}
 """
 
@@ -471,7 +473,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "calculator",
-            "description": "执行数学计算。",
+            "description": "执行数学计算。当用户需要做算术、算百分比、算价格、算折扣时必须调用，不要心算。",
             "parameters": {
                 "type": "object",
                 "properties": {"expression": {"type": "string"}},
@@ -483,7 +485,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "get_time",
-            "description": "获取当前日期时间。",
+            "description": "获取当前日期、时间、星期几。当用户问'现在几点'、'今天几号'、'今天星期几'时必须调用，不要凭训练记忆回答。",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -491,7 +493,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "get_weather",
-            "description": "查询城市天气。",
+            "description": "查询指定城市的实时天气（温度、天气状况）。当用户问某地天气、温度、是否下雨时必须调用。",
             "parameters": {
                 "type": "object",
                 "properties": {"city": {"type": "string"}},

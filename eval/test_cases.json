@@ -1,0 +1,63 @@
+[
+  {
+    "id": "weather_1",
+    "input": "北京天气怎么样",
+    "expected_tool": "get_weather",
+    "expected_args": {"city": "北京"},
+    "category": "tool_call"
+  },
+  {
+    "id": "weather_2",
+    "input": "上海今天热不热",
+    "expected_tool": "get_weather",
+    "expected_args": {"city": "上海"},
+    "category": "tool_call"
+  },
+  {
+    "id": "calc_1",
+    "input": "帮我算 (12+8)*3",
+    "expected_tool": "calculator",
+    "expected_args": {"expression": "(12+8)*3"},
+    "category": "tool_call"
+  },
+  {
+    "id": "calc_2",
+    "input": "100 除以 7 等于多少",
+    "expected_tool": "calculator",
+    "expected_answer_contains": "14.2",
+    "category": "tool_call"
+  },
+  {
+    "id": "time_1",
+    "input": "现在几点",
+    "expected_tool": "get_time",
+    "category": "tool_call"
+  },
+  {
+    "id": "knowledge_1",
+    "input": "年假有几天",
+    "expected_tool": "search_knowledge",
+    "expected_answer_contains": "5",
+    "category": "rag"
+  },
+  {
+    "id": "knowledge_2",
+    "input": "差旅报销流程是什么",
+    "expected_tool": "search_knowledge",
+    "expected_answer_contains": "发票",
+    "category": "rag"
+  },
+  {
+    "id": "no_tool_1",
+    "input": "你好",
+    "expected_tool": null,
+    "category": "chat"
+  },
+  {
+    "id": "no_tool_2",
+    "input": "1+1等于几",
+    "expected_tool": null,
+    "expected_answer_contains": "2",
+    "category": "chat"
+  }
+]

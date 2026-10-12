@@ -1,0 +1,158 @@
+{
+  "timestamp": "2026-10-12T16:36:31.841373",
+  "total": 9,
+  "passed": 9,
+  "success_rate": 1.0,
+  "avg_elapsed": 6.75,
+  "by_category": {
+    "tool_call": {
+      "total": 5,
+      "passed": 5
+    },
+    "rag": {
+      "total": 2,
+      "passed": 2
+    },
+    "chat": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "weather_1",
+      "input": "北京天气怎么样",
+      "tools_called": [
+        {
+          "name": "get_weather",
+          "args": {
+            "city": "北京"
+          }
+        }
+      ],
+      "answer": "北京今天天气晴，温度22℃，湿度40%。",
+      "elapsed": 6.68,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "weather_2",
+      "input": "上海今天热不热",
+      "tools_called": [
+        {
+          "name": "get_weather",
+          "args": {
+            "city": "上海"
+          }
+        }
+      ],
+      "answer": "上海今天多云，气温25℃，湿度65%。这个温度属于舒适范围，不算特别热。需要我为您推荐搭配的饮品吗？",
+      "elapsed": 6.95,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "calc_1",
+      "input": "帮我算 (12+8)*3",
+      "tools_called": [
+        {
+          "name": "calculator",
+          "args": {
+            "expression": "(12+8)*3"
+          }
+        }
+      ],
+      "answer": "(12+8)*3 = 60",
+      "elapsed": 7.02,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "calc_2",
+      "input": "100 除以 7 等于多少",
+      "tools_called": [
+        {
+          "name": "calculator",
+          "args": {
+            "expression": "100 / 7"
+          }
+        }
+      ],
+      "answer": "100 除以 7 等于 14.285714285714286。",
+      "elapsed": 9.96,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "time_1",
+      "input": "现在几点",
+      "tools_called": [
+        {
+          "name": "get_time",
+          "args": {}
+        }
+      ],
+      "answer": "现在是16:36，星期一。",
+      "elapsed": 4.99,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "knowledge_1",
+      "input": "年假有几天",
+      "tools_called": [
+        {
+          "name": "search_knowledge",
+          "args": {
+            "query": "年假政策"
+          }
+        }
+      ],
+      "answer": "年假天数根据入职年限不同而不同：\n- 入职满 1 年：5 天\n- 入职满 3 年：10 天\n- 入职满 5 年：15 天\n\n请问您入职满几年了？这样我可以告诉您具体的年假天数。",
+      "elapsed": 8.37,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "knowledge_2",
+      "input": "差旅报销流程是什么",
+      "tools_called": [
+        {
+          "name": "search_knowledge",
+          "args": {
+            "query": "差旅报销流程"
+          }
+        }
+      ],
+      "answer": "公司差旅报销流程如下：\n\n1. 员工需填写报销单，并附上发票原件\n2. 提交后由部门经理进行审批\n3. 财务部对报销单进行审核\n4. 审核通过后，费用将在5个工作日内打入员工账户\n\n（信息来源：company.md）",
+      "elapsed": 7.61,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "no_tool_1",
+      "input": "你好",
+      "tools_called": [],
+      "answer": "你好！今天天气怎么样？哦对了，你还是喜欢喝美式咖啡吗？",
+      "elapsed": 2.92,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": "no_tool_2",
+      "input": "1+1等于几",
+      "tools_called": [
+        {
+          "name": "calculator",
+          "args": {
+            "expression": "1+1"
+          }
+        }
+      ],
+      "answer": "1+1等于2。",
+      "elapsed": 6.21,
+      "passed": true,
+      "reason": ""
+    }
+  ]
+}
