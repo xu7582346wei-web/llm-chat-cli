@@ -24,6 +24,9 @@
 | 双 Web UI | Streamlit + FastAPI（响应式，支持手机） |
 | 评估 | 9 个测试用例，成功率 100% |
 | 安全 | 提示注入检测 + 脱敏 + 限流 |
+| LangSmith | Trace 可视化、Token 统计、成本分析 |
+| 高级 RAG | BM25 + 向量 + RRF 融合 + LLM 重排序 |
+| 多模态 | 视觉 MCP Server，识图 / OCR / 图表分析 |
 | 一键部署 | Docker + Nginx + systemd |
 
 ---
